@@ -32,7 +32,7 @@ namespace Crypto
 
         public static string ToHexString(this Byte[] self)
         {
-            return BitConverter.ToString(self).Replace("-", "");
+            return BitConverter.ToString(self).Replace("-", "").ToLower();
         }
     } 
 }
