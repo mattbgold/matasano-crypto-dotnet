@@ -123,13 +123,25 @@ namespace Crypto.Challenges.Test
         [TestCase]
         public void Challenge6()
         {
-            Assert.That(37 == CryptoUtilities.GetHammingDistance("this is a test", "wokka wokka!!!"));
+            Assert.That(CryptoUtilities.GetHammingDistance("this is a test", "wokka wokka!!!") == 37);
 
-            string fileText = File.ReadAllText(@"Files\6.txt", Encoding.ASCII);
+            string fileTextBase64 =  File.ReadAllText(@"Files\6.txt", Encoding.ASCII);
+            string fileTextASCII = Encoding.ASCII.GetString(Convert.FromBase64String(fileTextBase64));
 
-            int keySize = CryptoUtilities.FindKeySize(fileText, 2, 40);
+            int keySize = CryptoUtilities.GetPotentialXorKeySizes(fileTextASCII, 2, 40, 1).First();
+            Console.WriteLine(String.Format("Key Size is: {0}", keySize));
+
+            var blocks = CryptoUtilities.Chunk<char>(fileTextASCII, keySize);
+            IEnumerable<string> transposed = blocks.Transpose().Select(x=>string.Concat(x.TakeWhile(char.IsLetter)));
+
+            foreach(string col in transposed)
+            {
+                Console.WriteLine(CryptoUtilities.FindSingleKeyXORdWithString(col.ToBytes()));
+            }
 
             Assert.That(keySize == 29);
+            
+
         }
     }
 }
