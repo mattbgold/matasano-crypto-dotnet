@@ -1,0 +1,7 @@
+F:\Development\DotNet\CryptoChallenges\Crypto\bin\Debug\Crypto.exe.config
+F:\Development\DotNet\CryptoChallenges\Crypto\bin\Debug\Crypto.exe
+F:\Development\DotNet\CryptoChallenges\Crypto\bin\Debug\Crypto.pdb
+F:\Development\DotNet\CryptoChallenges\Crypto\obj\Debug\Crypto.csprojResolveAssemblyReference.cache
+F:\Development\DotNet\CryptoChallenges\Crypto\obj\Debug\Crypto.exe
+F:\Development\DotNet\CryptoChallenges\Crypto\obj\Debug\Crypto.pdb
+F:\Development\DotNet\CryptoChallenges\Crypto\bin\Debug\Files\6.txt
