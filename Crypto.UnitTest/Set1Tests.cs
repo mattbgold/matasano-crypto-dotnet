@@ -131,17 +131,15 @@ namespace Crypto.Challenges.Test
             int keySize = CryptoUtilities.GetPotentialXorKeySizes(fileTextASCII, 2, 40, 1).First();
             Console.WriteLine(String.Format("Key Size is: {0}", keySize));
 
-            var blocks = CryptoUtilities.Chunk<char>(fileTextASCII, keySize);
-            IEnumerable<string> transposed = blocks.Transpose().Select(x=>string.Concat(x.TakeWhile(char.IsLetter)));
+            byte[] key = CryptoUtilities.ExtractRepeatingKeyXOR(fileTextASCII, keySize);
 
-            foreach(string col in transposed)
-            {
-                Console.WriteLine(CryptoUtilities.FindSingleKeyXORdWithString(col.ToBytes()));
-            }
+            Console.WriteLine("Key: " + Encoding.ASCII.GetString(key));
 
-            Assert.That(keySize == 29);
-            
+            var solution = Encoding.ASCII.GetString(fileTextASCII.ToBytes().XOR(key));
+            Console.WriteLine(solution);
 
+            string fileSolution = File.ReadAllText(@"Files\6_Solution.txt").Replace("\r\n", "\n");
+            Assert.That(solution.CompareTo(fileSolution) == 0);
         }
     }
 }

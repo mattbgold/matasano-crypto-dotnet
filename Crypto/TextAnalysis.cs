@@ -28,7 +28,7 @@ namespace Crypto
             var spaceCount = str.Count(x => x == ' ');
             str = str.Replace(" ", "").ToLower();
 
-            int score = spaceCount * 10;
+            int score = 0;
 
             for (int i = 0; i < str.Length - 1; i++)
             {
@@ -39,8 +39,36 @@ namespace Crypto
                 }
                 else
                 {
-                    //TODO: expand here to subtract more based on really crappy chars
-                    score -= 1;
+                    if (str[i] < 32)
+                    {
+                        if (str[i] != 10)
+                        {
+                            score -= 50;
+                        }
+                    }
+                    else if (Char.IsLetterOrDigit(str[i]))
+                    {
+                        if (Char.IsLower(str[i]))
+                        {
+                            score += 10;
+                        }
+                        else
+                        {
+                            score += 5;
+                        }
+                    }
+                    else if(Char.IsPunctuation(str[i]))
+                    {
+                        score += 3;
+                    }
+                    else if (str[i] == 32)
+                    {
+                        score += 20;
+                    }
+                    else
+                    {
+                        score -= 5;
+                    }
                 }
             }
             return score;

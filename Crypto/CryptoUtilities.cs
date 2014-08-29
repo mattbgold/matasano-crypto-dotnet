@@ -61,11 +61,21 @@ namespace Crypto
             }
         }
 
+
+        public static byte[] ExtractRepeatingKeyXOR(string file, int keySize)
+        {
+            var bytes = file.ToBytes();
+            var blocks = CryptoUtilities.Chunk<byte>(bytes, keySize);
+            byte[][] transposed = blocks.Transpose().Select(x => x.ToArray()).ToArray();
+
+            return Enumerable.Range(0, keySize).Select(i => FindSingleKeyXORdWithString(transposed[i])).ToArray();
+        }
+
         public static byte FindSingleKeyXORdWithString(byte[] encodedStringBytes)
         {
             var highestScore = int.MinValue;
             var highestByte = 0x00;
-            for (var i = 0x00; i < 0xFF; i++)
+            for (var i = 0x00; i <= 0x7F; i++)
             {
                 var byteArray = encodedStringBytes.XOR(new byte[] { (byte)i });
                 var decodedString = System.Text.Encoding.ASCII.GetString(byteArray);
