@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -98,6 +99,37 @@ namespace Crypto
                 }
             }
             return (byte)highestByte;
+        }
+
+        public static string AesDecryptECB(byte[] inputBytes, byte[] key)
+        {
+            Byte[] outputBytes = inputBytes;
+
+            string plaintext = string.Empty;
+
+            using (MemoryStream memoryStream = new MemoryStream(outputBytes))
+            {
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm(key).CreateDecryptor(key, key), CryptoStreamMode.Read))
+                {
+                    using (StreamReader srDecrypt = new StreamReader(cryptoStream))
+                    {
+                        plaintext = srDecrypt.ReadToEnd();
+                    }
+                }
+            }
+
+            return plaintext;
+        }
+
+        private static AesManaged GetCryptoAlgorithm(byte[] key)
+        {
+            //set the mode, padding and block size
+            var algorithm = new AesManaged();
+            algorithm.Padding = PaddingMode.None;
+            algorithm.Mode = CipherMode.ECB;
+            algorithm.KeySize = key.Length*8;
+            algorithm.BlockSize = 128;
+            return algorithm;
         }
     }
 }

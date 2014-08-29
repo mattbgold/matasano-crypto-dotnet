@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Crypto.Challenges.Test
 {
@@ -120,7 +121,7 @@ namespace Crypto.Challenges.Test
         /// Break repeating-key XOR
         /// http://cryptopals.com/sets/1/challenges/6/
         /// </summary>
-        [TestCase]
+        [Test]
         public void Challenge6()
         {
             Assert.That(CryptoUtilities.GetHammingDistance("this is a test", "wokka wokka!!!") == 37);
@@ -140,6 +141,23 @@ namespace Crypto.Challenges.Test
 
             string fileSolution = File.ReadAllText(@"Files\6_Solution.txt").Replace("\r\n", "\n");
             Assert.That(solution.CompareTo(fileSolution) == 0);
+        }
+
+
+        /// <summary>
+        /// AES in ECB mode
+        /// http://cryptopals.com/sets/1/challenges/7/
+        /// </summary>
+        /// <param name="key"></param>
+        [TestCase("YELLOW SUBMARINE")]
+        public void Challenge7(string key)
+        {
+            var fileBytes = Convert.FromBase64String(File.ReadAllText(@"Files\7.txt"));
+            var solution = CryptoUtilities.AesDecryptECB(fileBytes, key.ToBytes());
+            Console.WriteLine(solution);
+            
+            //string fileSolution = File.ReadAllText(@"Files\7_Solution.txt").Replace("\r\n", "\n");
+            Assert.That(solution.StartsWith("I'm back and"));
         }
     }
 }
