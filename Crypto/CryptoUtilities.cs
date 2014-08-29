@@ -61,7 +61,13 @@ namespace Crypto
             }
         }
 
-
+        /// <summary>
+        /// Given an encrypted string and a keysize, finds the key.
+        /// This assumes the key starts on the first character of the file. 
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="keySize"></param>
+        /// <returns></returns>
         public static byte[] ExtractRepeatingKeyXOR(string file, int keySize)
         {
             var bytes = file.ToBytes();
@@ -71,6 +77,11 @@ namespace Crypto
             return Enumerable.Range(0, keySize).Select(i => FindSingleKeyXORdWithString(transposed[i])).ToArray();
         }
 
+        /// <summary>
+        /// Finds the byte that, when XOR'd with the input string, produces the most englishey (decrypted) text
+        /// </summary>
+        /// <param name="encodedStringBytes">an encrypted string</param>
+        /// <returns>the byte key</returns>
         public static byte FindSingleKeyXORdWithString(byte[] encodedStringBytes)
         {
             var highestScore = int.MinValue;
