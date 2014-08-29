@@ -55,7 +55,7 @@ namespace Crypto.Challenges.Test
         public string Challenge3(string input)
         {
             var candidates = new List<string>();
-            for (var i = 0x00; i < 0xFF; i++)
+            for (var i = 0x00; i <= 0x7F; i++)
             {
                 var byteArray = input.ToBytes(16).XOR(new byte[]{(byte)i});
                 candidates.Add(System.Text.Encoding.ASCII.GetString(byteArray));
@@ -83,7 +83,7 @@ namespace Crypto.Challenges.Test
             {
                 var encryptedBytes = line.ToBytes(16);
 
-                for (var i = 0x00; i < 0xFF; i++)
+                for (var i = 0x00; i <= 0x7F; i++)
                 {
                     var byteArray = encryptedBytes.XOR(new byte[]{(byte)i});
                     var decodedString = System.Text.Encoding.ASCII.GetString(byteArray);
