@@ -10,7 +10,7 @@ namespace Crypto
     {
         public static byte[] ToBytes(this String str)
         {
-            return ToBytes(str, ByteString.ASCII);
+            return ToBytes(str, ByteString.UTF8);
         }
         /// <summary></summary>
         /// <param name="str"></param>
@@ -34,7 +34,7 @@ namespace Crypto
 
         public static string ToAscii(this Byte[] bytes)
         {
-            return ToString(bytes, ByteString.ASCII);
+            return ToString(bytes, ByteString.UTF8);
         }
 
         public static string ToString(this Byte[] bytes, ByteString encoding)

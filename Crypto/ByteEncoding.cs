@@ -8,6 +8,6 @@ namespace Crypto
 {
     public enum ByteString
     {
-        ASCII, Binary, Octal, Hexadecimal, Base64
+        UTF8, Unicode, Binary, Octal, Hexadecimal, Base64
     }
 }

@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Set1Tests.cs" />
+    <Compile Include="Set2Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Files\4.txt">

@@ -123,9 +123,43 @@ namespace Crypto
 
         public static bool AreBytesECBEncrypted(byte[] bytes)
         {
-            var chunks = bytes.Chunk(16);
+            return AreBytesECBEncrypted(bytes, 16);
+        }
+
+        public static bool AreBytesECBEncrypted(byte[] bytes, int blockSize)
+        {
+            var chunks = bytes.Chunk(blockSize);
             var distinctLength = chunks.Distinct(new BytesComparer()).Count();
             return distinctLength < chunks.Count();
+        }
+
+        /// <summary>
+        /// PKCS7 padding
+        /// </summary>
+        /// <returns></returns>
+        public static byte[] PadBytes(byte[] bytes, int toLength)
+        {
+            int bytesToPad = toLength - bytes.Length;
+            if (bytesToPad < 0)
+            {
+                throw new InvalidOperationException("Byte length is longer than desired length after padding!");
+            }
+
+            var padBlock = Convert.ToByte(bytesToPad);
+            byte[] paddedBytes = new byte[toLength];
+            for (int i = 0; i < toLength; i++)
+            {
+                if (i < bytes.Length)
+                {
+                    paddedBytes[i] = bytes[i];
+                }
+                else
+                {
+                    paddedBytes[i] = padBlock;
+                }
+            }
+
+            return paddedBytes;
         }
 
         private static AesManaged GetCryptoAlgorithm(byte[] key)
