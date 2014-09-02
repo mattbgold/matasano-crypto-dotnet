@@ -123,7 +123,9 @@ namespace Crypto
 
         public static bool AreBytesECBEncrypted(byte[] bytes)
         {
-            throw new NotImplementedException();
+            var chunks = bytes.Chunk(16);
+            var distinctLength = chunks.Distinct(new BytesComparer()).Count();
+            return distinctLength < chunks.Count();
         }
 
         private static AesManaged GetCryptoAlgorithm(byte[] key)

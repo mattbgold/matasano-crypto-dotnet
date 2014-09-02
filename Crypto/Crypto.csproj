@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BytesComparer.cs" />
     <Compile Include="CryptoExtensions.cs" />
     <Compile Include="CryptoUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

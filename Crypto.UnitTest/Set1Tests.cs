@@ -160,12 +160,12 @@ namespace Crypto.Challenges.Test
             Assert.That(solution.StartsWith("I'm back and"));
         }
 
-        [TestCase(Result="abc123")]
-        public string Challenge8()
+        [TestCase]
+        public void Challenge8()
         {
             var lines = File.ReadAllLines(@"Files\8.txt").Select(x=>x.ToBytes(16));
 
-            return Encoding.ASCII.GetString(lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x)));
+            Assert.DoesNotThrow(()=>Encoding.ASCII.GetString(lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x))));
 
             /*foreach (var bytes in lines)
             {
