@@ -12,9 +12,13 @@ namespace Crypto
         {
             return ToBytes(str, null);
         }
+        /// <summary></summary>
+        /// <param name="str"></param>
+        /// <param name="base">2, 8, 10, or 16</param>
+        /// <returns></returns>
         public static byte[] ToBytes(this String str, int? @base)
         {
-            if (@base.HasValue) //This indicates the string is a *special* representation of bytes such as Hex
+            if (@base.HasValue) //This indicates the string is a *special* representation of bytes such as Hex.
             {
                 return Enumerable.Range(0, str.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(str.Substring(x, 2), @base.Value)).ToArray();
             }

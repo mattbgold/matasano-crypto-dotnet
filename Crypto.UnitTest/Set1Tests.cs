@@ -159,5 +159,21 @@ namespace Crypto.Challenges.Test
             //string fileSolution = File.ReadAllText(@"Files\7_Solution.txt").Replace("\r\n", "\n");
             Assert.That(solution.StartsWith("I'm back and"));
         }
+
+        [TestCase(Result="abc123")]
+        public string Challenge8()
+        {
+            var lines = File.ReadAllLines(@"Files\8.txt").Select(x=>x.ToBytes(16));
+
+            return Encoding.ASCII.GetString(lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x)));
+
+            /*foreach (var bytes in lines)
+            {
+                if (CryptoUtilities.AreBytesECBEncrypted(bytes))
+                {
+                    Console.WriteLine(Encoding.ASCII.GetString(bytes));
+                }
+            }*/
+        }
     }
 }

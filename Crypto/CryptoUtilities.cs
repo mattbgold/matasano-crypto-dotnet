@@ -75,7 +75,7 @@ namespace Crypto
             var blocks = CryptoUtilities.Chunk<byte>(bytes, keySize);
             byte[][] transposed = blocks.Transpose().Select(x => x.ToArray()).ToArray();
 
-            return Enumerable.Range(0, keySize).Select(i => FindSingleKeyXORdWithString(transposed[i])).ToArray();
+            return transposed.Select(x => FindSingleKeyXORdWithString(x)).ToArray();
         }
 
         /// <summary>
@@ -119,6 +119,11 @@ namespace Crypto
             }
 
             return plaintext;
+        }
+
+        public static bool AreBytesECBEncrypted(byte[] bytes)
+        {
+            throw new NotImplementedException();
         }
 
         private static AesManaged GetCryptoAlgorithm(byte[] key)
