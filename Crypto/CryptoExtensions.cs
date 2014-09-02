@@ -10,33 +10,57 @@ namespace Crypto
     {
         public static byte[] ToBytes(this String str)
         {
-            return ToBytes(str, null);
+            return ToBytes(str, ByteString.ASCII);
         }
         /// <summary></summary>
         /// <param name="str"></param>
-        /// <param name="base">2, 8, 10, or 16</param>
+        /// <param name="base">2, 8, 10, 16, or 64</param>
         /// <returns></returns>
-        public static byte[] ToBytes(this String str, int? @base)
+        public static byte[] ToBytes(this String str, ByteString encoding)
         {
-            if (@base.HasValue) //This indicates the string is a *special* representation of bytes such as Hex.
+            switch (encoding)
             {
-                return Enumerable.Range(0, str.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(str.Substring(x, 2), @base.Value)).ToArray();
+                case ByteString.Binary:
+                    return GetBytesFromEncodedString(str, 2);
+                case ByteString.Octal:
+                    return GetBytesFromEncodedString(str, 8);
+                case ByteString.Hexadecimal:
+                    return GetBytesFromEncodedString(str, 16);
+                case ByteString.Base64:
+                    return Convert.FromBase64String(str);
+                default : return System.Text.Encoding.ASCII.GetBytes(str);
             }
-            else //we just want the byte representation of the string itself.
+        }
+
+        public static string ToAscii(this Byte[] bytes)
+        {
+            return ToString(bytes, ByteString.ASCII);
+        }
+
+        public static string ToString(this Byte[] bytes, ByteString encoding)
+        {
+            switch (encoding)
             {
-                return System.Text.Encoding.ASCII.GetBytes(str);
+                case ByteString.Binary:
+                case ByteString.Octal:
+                    throw new NotImplementedException();
+                case ByteString.Hexadecimal:
+                    return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+                case ByteString.Base64:
+                    return Convert.ToBase64String(bytes);
+                default: return System.Text.Encoding.ASCII.GetString(bytes);
             }
+        }
+
+        private static byte[] GetBytesFromEncodedString(string str, int @base)
+        {
+            return Enumerable.Range(0, str.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(str.Substring(x, 2), @base)).ToArray();
         }
 
         public static byte[] XOR(this Byte[] self, IList<byte> key)
         {
             //Damn skippy, this xors a byte array with another byte array "key", repeating the key if needed.
             return Enumerable.Range(0, self.Length).Select(i => (byte)(self[i] ^ key[i % key.Count()])).ToArray();
-        }
-
-        public static string ToHexString(this Byte[] self)
-        {
-            return BitConverter.ToString(self).Replace("-", "").ToLower();
         }
 
         /// <summary>

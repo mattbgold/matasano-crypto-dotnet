@@ -26,7 +26,7 @@ namespace Crypto.Challenges.Test
             Result = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")]
         public string Challenge1(string input)
         {
-            return Convert.ToBase64String(input.ToBytes(16));
+            return input.ToBytes(ByteString.Hexadecimal).ToString(ByteString.Base64);
         }
 
 
@@ -41,7 +41,7 @@ namespace Crypto.Challenges.Test
             Result="746865206b696420646f6e277420706c6179")]
         public string Challenge2(string input1, string input2)
         {
-            return input1.ToBytes(16).XOR(input2.ToBytes(16)).ToHexString();
+            return input1.ToBytes(ByteString.Hexadecimal).XOR(input2.ToBytes(ByteString.Hexadecimal)).ToString(ByteString.Hexadecimal);
         }
 
 
@@ -58,8 +58,8 @@ namespace Crypto.Challenges.Test
             var candidates = new List<string>();
             for (var i = 0x00; i <= 0x7F; i++)
             {
-                var byteArray = input.ToBytes(16).XOR(new byte[]{(byte)i});
-                candidates.Add(System.Text.Encoding.ASCII.GetString(byteArray));
+                var byteArray = input.ToBytes(ByteString.Hexadecimal).XOR(new byte[] { (byte)i });
+                candidates.Add(byteArray.ToAscii());
             }
             var result = TextAnalysis.GetHighestScore(candidates);
             Console.WriteLine(result);
@@ -82,12 +82,12 @@ namespace Crypto.Challenges.Test
 
             foreach (var line in lines)
             {
-                var encryptedBytes = line.ToBytes(16);
+                var encryptedBytes = line.ToBytes(ByteString.Hexadecimal);
 
                 for (var i = 0x00; i <= 0x7F; i++)
                 {
                     var byteArray = encryptedBytes.XOR(new byte[]{(byte)i});
-                    var decodedString = System.Text.Encoding.ASCII.GetString(byteArray);
+                    var decodedString = byteArray.ToAscii();
                     var score = TextAnalysis.GetScore(decodedString);
                     if (score > highestScore)
                     {
@@ -113,7 +113,7 @@ namespace Crypto.Challenges.Test
             Result="0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f")]
         public string Challenge5(string key, string bytesToEncrypt)
         {
-            return bytesToEncrypt.ToBytes().XOR(key.ToBytes()).ToHexString();
+            return bytesToEncrypt.ToBytes().XOR(key.ToBytes()).ToString(ByteString.Hexadecimal);
         }
 
 
@@ -127,16 +127,16 @@ namespace Crypto.Challenges.Test
             Assert.That(CryptoUtilities.GetHammingDistance("this is a test", "wokka wokka!!!") == 37);
 
             string fileTextBase64 =  File.ReadAllText(@"Files\6.txt", Encoding.ASCII);
-            string fileTextASCII = Encoding.ASCII.GetString(Convert.FromBase64String(fileTextBase64));
+            string fileTextASCII = fileTextBase64.ToBytes(ByteString.Base64).ToAscii();
 
             int keySize = CryptoUtilities.GetPotentialXorKeySizes(fileTextASCII, 2, 40, 1).First();
             Console.WriteLine(String.Format("Key Size is: {0}", keySize));
 
             byte[] key = CryptoUtilities.ExtractRepeatingKeyXOR(fileTextASCII, keySize);
 
-            Console.WriteLine("Key: " + Encoding.ASCII.GetString(key));
+            Console.WriteLine("Key: " + key.ToAscii());
 
-            var solution = Encoding.ASCII.GetString(fileTextASCII.ToBytes().XOR(key));
+            var solution = fileTextASCII.ToBytes().XOR(key).ToAscii();
             Console.WriteLine(solution);
 
             string fileSolution = File.ReadAllText(@"Files\6_Solution.txt").Replace("\r\n", "\n");
@@ -152,7 +152,7 @@ namespace Crypto.Challenges.Test
         [TestCase("YELLOW SUBMARINE")]
         public void Challenge7(string key)
         {
-            var fileBytes = Convert.FromBase64String(File.ReadAllText(@"Files\7.txt"));
+            var fileBytes = File.ReadAllText(@"Files\7.txt").ToBytes(ByteString.Base64);
             var solution = CryptoUtilities.AesDecryptECB(fileBytes, key.ToBytes());
             Console.WriteLine(solution);
             
@@ -160,20 +160,18 @@ namespace Crypto.Challenges.Test
             Assert.That(solution.StartsWith("I'm back and"));
         }
 
+
+        /// <summary>
+        /// Detect AES in ECB mode
+        /// http://cryptopals.com/sets/1/challenges/8/
+        /// </summary>
         [TestCase]
         public void Challenge8()
         {
-            var lines = File.ReadAllLines(@"Files\8.txt").Select(x=>x.ToBytes(16));
+            var lines = File.ReadAllLines(@"Files\8.txt").Select(x => x.ToBytes(ByteString.Hexadecimal));
 
-            Assert.DoesNotThrow(()=>Encoding.ASCII.GetString(lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x))));
-
-            /*foreach (var bytes in lines)
-            {
-                if (CryptoUtilities.AreBytesECBEncrypted(bytes))
-                {
-                    Console.WriteLine(Encoding.ASCII.GetString(bytes));
-                }
-            }*/
+            //Detect one (and only one) ECB encrypted line in the entire file. 
+            Assert.DoesNotThrow(()=>lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x)));
         }
     }
 }
