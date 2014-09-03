@@ -157,7 +157,7 @@ namespace Crypto.Challenges.Test
             Console.WriteLine(solution);
             
             //string fileSolution = File.ReadAllText(@"Files\7_Solution.txt").Replace("\r\n", "\n");
-            Assert.That(solution.StartsWith("I'm back and"));
+            Assert.That(solution.ToAscii().StartsWith("I'm back and"));
         }
 
 

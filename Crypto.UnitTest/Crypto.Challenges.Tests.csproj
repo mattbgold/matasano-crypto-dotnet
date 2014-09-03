@@ -89,6 +89,9 @@
     <Compile Include="Set2Tests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Files\10.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Files\4.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

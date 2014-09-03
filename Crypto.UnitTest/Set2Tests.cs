@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,23 @@ namespace Crypto.UnitTest
         public byte[] Challenge9(string bytesToPad, int desiredLength)
         {
             return CryptoUtilities.PadBytes(bytesToPad.ToBytes(), desiredLength);
+        }
+
+
+        /// <summary>
+        /// Implement CBC mode
+        /// http://cryptopals.com/sets/2/challenges/10/
+        /// </summary>
+        [Test]
+        public void Challenge10()
+        {
+            //Assert AES decryption works. 
+            Assert.That("yellow submarineyellow submarine".ToBytes().SequenceEqual(CryptoUtilities.AesDecryptECB(CryptoUtilities.AesEncryptECB("yellow submarineyellow submarine".ToBytes(), "yellow submarine".ToBytes()), "yellow submarine".ToBytes())));
+
+            var fileBytes = File.ReadAllText(@"Files\10.txt").ToBytes(ByteString.Base64);
+            var solution = CryptoUtilities.AESDecryptCBC(fileBytes, "YELLOW SUBMARINE".ToBytes(), new byte[]{0}).ToAscii();
+
+            Assert.That(solution.StartsWith("I'm back and I'm ringin' the bell"));
         }
     }
 }

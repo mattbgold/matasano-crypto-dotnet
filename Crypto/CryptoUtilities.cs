@@ -101,26 +101,68 @@ namespace Crypto
             return (byte)highestByte;
         }
 
-        public static string AesDecryptECB(byte[] inputBytes, byte[] key)
+        public static byte[] AesDecryptECB(byte[] inputBytes, byte[] key)
         {
-            Byte[] outputBytes = inputBytes;
+            byte[] decrypted = null;
 
-            string plaintext = string.Empty;
-
-            using (MemoryStream memoryStream = new MemoryStream(outputBytes))
+            using (MemoryStream memoryStream = new MemoryStream(inputBytes))
             {
                 using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm(key).CreateDecryptor(key, key), CryptoStreamMode.Read))
                 {
-                    using (StreamReader srDecrypt = new StreamReader(cryptoStream))
+                    using (var memstream = new MemoryStream())
                     {
-                        plaintext = srDecrypt.ReadToEnd();
+                        cryptoStream.CopyTo(memstream);
+                        decrypted = memstream.ToArray();
                     }
                 }
             }
 
-            return plaintext;
+            return decrypted;
         }
 
+        public static byte[] AesEncryptECB(byte[] inputBytes, byte[] key)
+        {
+            byte[] encrypted = null;
+
+            using (MemoryStream memoryStream = new MemoryStream(inputBytes))
+            {
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm(key).CreateEncryptor(key, key), CryptoStreamMode.Read))
+                {
+                    using (var memstream = new MemoryStream())
+                    {
+                        cryptoStream.CopyTo(memstream);
+                        encrypted = memstream.ToArray();
+                    }
+                }
+            }
+
+            return encrypted;
+        }
+
+        public static byte[] AESEncryptCBC(byte[] inputBytes, byte[] key, byte[] iv)
+        {
+            var blocks = inputBytes.Chunk(16).ToArray();
+            List<byte[]> encryptedBlocks = new List<byte[]>();
+            for (int i = 0; i < blocks.Count(); i++)
+            {
+                var encryptedBlock = AesEncryptECB(blocks[i].ToArray().XOR(i == 0 ? iv : encryptedBlocks[i - 1].ToArray()), key);
+                encryptedBlocks.Add(encryptedBlock);
+            }
+
+            return encryptedBlocks.SelectMany(x => x).ToArray();
+        }
+        public static byte[] AESDecryptCBC(byte[] inputBytes, byte[] key, byte[] iv)
+        {
+            var blocks = inputBytes.Chunk(16).ToArray();
+            List<byte[]> decryptedBlocks = new List<byte[]>();
+            for (int i = 0; i < blocks.Count(); i++)
+            {
+                var decryptedBlock = AesDecryptECB(blocks[i].ToArray(), key).XOR(i == 0 ? iv : blocks[i - 1].ToArray());
+                decryptedBlocks.Add(decryptedBlock);
+            }
+
+            return decryptedBlocks.SelectMany(x => x).ToArray();
+        }
         public static bool AreBytesECBEncrypted(byte[] bytes)
         {
             return AreBytesECBEncrypted(bytes, 16);
