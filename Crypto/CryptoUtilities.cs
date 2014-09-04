@@ -103,40 +103,19 @@ namespace Crypto
 
         public static byte[] AesDecryptECB(byte[] inputBytes, byte[] key)
         {
-            byte[] decrypted = null;
-
-            using (MemoryStream memoryStream = new MemoryStream(inputBytes))
-            {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm(key).CreateDecryptor(key, key), CryptoStreamMode.Read))
-                {
-                    using (var memstream = new MemoryStream())
-                    {
-                        cryptoStream.CopyTo(memstream);
-                        decrypted = memstream.ToArray();
-                    }
-                }
-            }
+            var blocks = inputBytes.Chunk(16);
+            var decrypted = blocks.SelectMany(block => AES128BlockDecrypt(block.ToArray(), key)).ToArray();
 
             return decrypted;
         }
 
         public static byte[] AesEncryptECB(byte[] inputBytes, byte[] key)
         {
-            byte[] encrypted = null;
-
-            using (MemoryStream memoryStream = new MemoryStream(inputBytes))
-            {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, GetCryptoAlgorithm(key).CreateEncryptor(key, key), CryptoStreamMode.Read))
-                {
-                    using (var memstream = new MemoryStream())
-                    {
-                        cryptoStream.CopyTo(memstream);
-                        encrypted = memstream.ToArray();
-                    }
-                }
-            }
-
-            return encrypted;
+            inputBytes = PadToBlockSize(inputBytes, 16);
+            
+            var blocks = inputBytes.Chunk(16);
+            var encryptedBlocks = blocks.Select(block => AES128BlockEncrypt(block.ToArray(), key));
+            return encryptedBlocks.SelectMany(x => x).ToArray();
         }
 
         public static byte[] AESEncryptCBC(byte[] inputBytes, byte[] key, byte[] iv)
@@ -151,6 +130,7 @@ namespace Crypto
 
             return encryptedBlocks.SelectMany(x => x).ToArray();
         }
+
         public static byte[] AESDecryptCBC(byte[] inputBytes, byte[] key, byte[] iv)
         {
             var blocks = inputBytes.Chunk(16).ToArray();
@@ -163,16 +143,25 @@ namespace Crypto
 
             return decryptedBlocks.SelectMany(x => x).ToArray();
         }
+
         public static bool AreBytesECBEncrypted(byte[] bytes)
         {
-            return AreBytesECBEncrypted(bytes, 16);
-        }
-
-        public static bool AreBytesECBEncrypted(byte[] bytes, int blockSize)
-        {
-            var chunks = bytes.Chunk(blockSize);
+            byte[][] chunks = bytes.Chunk(16).Select(x=>x.ToArray()).ToArray();
             var distinctLength = chunks.Distinct(new BytesComparer()).Count();
             return distinctLength < chunks.Count();
+        }
+
+        private static byte[] PadToBlockSize(byte[] bytes, int blockSize)
+        {
+            var dif = (bytes.Length % blockSize);
+            if (dif == 0)
+            {
+                return bytes;
+            }
+            else
+            {
+                return PadBytes(bytes, bytes.Length + blockSize - dif);
+            }
         }
 
         /// <summary>
@@ -204,15 +193,75 @@ namespace Crypto
             return paddedBytes;
         }
 
-        private static AesManaged GetCryptoAlgorithm(byte[] key)
+        public static byte[] AESEncryptionOracle(byte[] bytes)
         {
-            //set the mode, padding and block size
-            var algorithm = new AesManaged();
-            algorithm.Padding = PaddingMode.None;
-            algorithm.Mode = CipherMode.ECB;
-            algorithm.KeySize = key.Length*8;
-            algorithm.BlockSize = 128;
-            return algorithm;
+            var r = new Random();
+            var inputBytes = bytes.ToList();
+            inputBytes.AddRange(RandomBytes(r.Next(1, 6)));
+            var paddedBytes = RandomBytes(r.Next(1, 6)).ToList();
+            paddedBytes.AddRange(inputBytes);
+            
+            if (r.Next(2) == 0)
+            {
+                return AesEncryptECB(paddedBytes.ToArray(), RandomBytes(16));
+            }
+            else
+            {
+                return AESEncryptCBC(paddedBytes.ToArray(), RandomBytes(16), RandomBytes(16));
+            }            
         }
+
+        #region  Private
+
+        private static byte[] RandomBytes(int num)
+        {
+            var key = new byte[num];
+            new Random().NextBytes(key);
+            return key;
+        }
+
+        private static byte[] AES128BlockEncrypt(byte[] plainText, byte[] Key)
+        {
+            byte[] output_buffer = new byte[plainText.Length];
+
+            using (AesManaged aesAlg = new AesManaged())
+            {
+                aesAlg.Mode = CipherMode.ECB;
+
+                aesAlg.BlockSize = 128;
+                aesAlg.KeySize = 128;
+                aesAlg.Padding = PaddingMode.None;
+                aesAlg.Key = Key;
+
+                // Create a decrytor to perform the stream transform.
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+                encryptor.TransformBlock(plainText, 0, plainText.Length, output_buffer, 0);
+            }
+
+            return output_buffer;
+        }
+
+        private static byte[] AES128BlockDecrypt(byte[] cipherText, byte[] Key)
+        {
+            // Declare the string used to hold the decrypted text. 
+            byte[] output_buffer = new byte[cipherText.Length];
+
+            using (AesManaged aesAlg = new AesManaged())
+            {
+                aesAlg.Mode = CipherMode.ECB;
+
+                aesAlg.BlockSize = 128;
+                aesAlg.KeySize = 128;
+                aesAlg.Padding = PaddingMode.None;
+                aesAlg.Key = Key;
+
+                // Create a decrytor to perform the stream transform.
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                decryptor.TransformBlock(cipherText, 0, cipherText.Length, output_buffer, 0);
+            }
+
+            return output_buffer;
+        }
+        #endregion
     }
 }

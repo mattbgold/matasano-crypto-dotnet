@@ -171,7 +171,7 @@ namespace Crypto.Challenges.Test
             var lines = File.ReadAllLines(@"Files\8.txt").Select(x => x.ToBytes(ByteString.Hexadecimal));
 
             //Detect one (and only one) ECB encrypted line in the entire file. 
-            Assert.DoesNotThrow(()=>lines.Single(x => CryptoUtilities.AreBytesECBEncrypted(x)));
+            Assert.That(lines.Where(x => CryptoUtilities.AreBytesECBEncrypted(x)).Count()==1);
         }
     }
 }

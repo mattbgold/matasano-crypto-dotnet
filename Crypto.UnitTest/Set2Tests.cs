@@ -39,10 +39,24 @@ namespace Crypto.UnitTest
             //Assert AES decryption works. 
             Assert.That("yellow submarineyellow submarine".ToBytes().SequenceEqual(CryptoUtilities.AesDecryptECB(CryptoUtilities.AesEncryptECB("yellow submarineyellow submarine".ToBytes(), "yellow submarine".ToBytes()), "yellow submarine".ToBytes())));
 
+
             var fileBytes = File.ReadAllText(@"Files\10.txt").ToBytes(ByteString.Base64);
             var solution = CryptoUtilities.AESDecryptCBC(fileBytes, "YELLOW SUBMARINE".ToBytes(), new byte[]{0}).ToAscii();
-
+            Console.WriteLine(solution);
             Assert.That(solution.StartsWith("I'm back and I'm ringin' the bell"));
+        }
+
+        [Test]
+        public void Challenge11()
+        {
+            var someBytes = File.ReadAllText(@"Files\7_Solution.txt").ToBytes();
+            //get this to work first, the function works
+            Console.WriteLine("Function Works: " + CryptoUtilities.AreBytesECBEncrypted(CryptoUtilities.AesEncryptECB(someBytes, "YELLOW SUBMARINE".ToBytes())).ToString());
+            foreach(var i in Enumerable.Range(0,10))
+            {
+                bool IsECB = CryptoUtilities.AreBytesECBEncrypted(CryptoUtilities.AESEncryptionOracle(someBytes));
+                Console.WriteLine(IsECB.ToString());
+            }
         }
     }
 }
