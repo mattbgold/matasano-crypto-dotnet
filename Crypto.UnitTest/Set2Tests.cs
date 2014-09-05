@@ -49,11 +49,10 @@ namespace Crypto.UnitTest
         [Test]
         public void Challenge11()
         {
-            var someBytes = File.ReadAllText(@"Files\7_Solution.txt").ToBytes();
-            //get this to work first, the function works
-            Console.WriteLine("Function Works: " + CryptoUtilities.AreBytesECBEncrypted(CryptoUtilities.AesEncryptECB(someBytes, "YELLOW SUBMARINE".ToBytes())).ToString());
+           
             foreach(var i in Enumerable.Range(0,10))
             {
+                var someBytes = "yellow submarineyellow submarineyellow submarineyellow submarineyellow submarineyellow submarine".ToBytes();
                 bool IsECB = CryptoUtilities.AreBytesECBEncrypted(CryptoUtilities.AESEncryptionOracle(someBytes));
                 Console.WriteLine(IsECB.ToString());
             }

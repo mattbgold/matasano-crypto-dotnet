@@ -112,7 +112,7 @@ namespace Crypto
         public static byte[] AesEncryptECB(byte[] inputBytes, byte[] key)
         {
             inputBytes = PadToBlockSize(inputBytes, 16);
-            
+
             var blocks = inputBytes.Chunk(16);
             var encryptedBlocks = blocks.Select(block => AES128BlockEncrypt(block.ToArray(), key));
             return encryptedBlocks.SelectMany(x => x).ToArray();
